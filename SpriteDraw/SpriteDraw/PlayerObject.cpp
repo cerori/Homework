@@ -31,8 +31,8 @@ void PlayerObject::ActionProc(void)
 			SetActionStand();
 		}
 
-		if (PLAYER_ATTACK1_L01 < GetSpriteNow() && PLAYER_ATTACK1_L_MAX > GetSpriteNow())
-			SetActionAttack1();
+		//if (PLAYER_ATTACK1_L01 < GetSpriteNow() && PLAYER_ATTACK1_L_MAX > GetSpriteNow())
+		//	SetActionAttack1();
 		break;
 	case dfACTION_ATTACK2:
 		SetActionAttack2();
