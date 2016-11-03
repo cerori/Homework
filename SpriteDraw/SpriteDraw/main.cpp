@@ -24,6 +24,11 @@ BOOL				InitInstance(HINSTANCE, int);
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
 
+
+// 사용자 전역
+using namespace logging::trivial;
+src::severity_logger< severity_level > lg;
+
 list<BaseObject *> g_list;
 
 PlayerObject *g_player;
@@ -33,6 +38,7 @@ BOOL g_isActiveApp;
 
 ScreenDib g_ScreenDib(640, 480, 32);
 SpriteDib g_SpriteDib(100, 0x00FFFFFF);
+void InitLog(void);
 
 cKey *g_keyMgr = cKey::GetInst();
 
@@ -65,6 +71,9 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	}
 
 	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_SPRITEDRAW));
+
+	InitLog();
+	logging::add_common_attributes();
 
 	InitialGame();
 
@@ -251,6 +260,22 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	사용자 함수
 */
 
+void InitLog(void)
+{
+	logging::add_file_log
+	(
+		keywords::file_name = "sample_%N.log",
+		keywords::rotation_size = 10 * 1024 * 1024, //10mb마다 rotate
+		keywords::time_based_rotation = sinks::file::rotation_at_time_point(0, 0, 0), //12시마다 rotate
+		keywords::format = "[%TimeStamp%]: %Message%"
+	);
+
+	logging::core::get()->set_filter
+	(
+		logging::trivial::severity >= logging::trivial::trace
+	);
+}
+
 void InitialGame(void)
 {
 	ContentLoad();
@@ -260,7 +285,7 @@ void InitialGame(void)
 	g_player->SetHp(50);
 	g_player->SetPostion(100, 200);
 	g_player->SetObjectType(PLAYER);
-	g_player->SetSprite(PLAYER_STAND_L01, PLAYER_STAND_L_MAX, dfDELAY_STAND);
+	g_player->SetSprite(PLAYER_STAND_R01, PLAYER_STAND_R_MAX, dfDELAY_STAND);
 
 	g_list.push_back(g_player);
 
@@ -363,9 +388,14 @@ void Update(void)
 
 	Draw();
 
+	BOOST_LOG_SEV(lg, info) << "A trace severity message";
+
 	Sleep(0.02f*1000);
 }
 
+/*
+1. 이동 중에 공격이 입력되면 멈추고 공격을 한다.
+*/
 void KeyProcess(void)
 {
 	DWORD action = dfACTION_STAND;
@@ -395,6 +425,7 @@ void KeyProcess(void)
 	if (g_keyMgr->StayKeyDown(VK_RIGHT) && g_keyMgr->StayKeyDown(VK_DOWN))
 		action = dfACTION_MOVE_RD;
 
+	// 공격
 	if (g_keyMgr->OnceKeyDown(e_Z))
 		action = dfACTION_ATTACK1;
 
@@ -420,8 +451,6 @@ void Action(void)
 
 void Draw(void)
 {
-	BaseObject *object;
-
 	BYTE *pDest = g_ScreenDib.GetDibBuffer();
 	int destWidth = g_ScreenDib.GetWidth();
 	int destHeight = g_ScreenDib.GetHeight();

@@ -7,6 +7,9 @@ extern SpriteDib g_SpriteDib;
 PlayerObject::PlayerObject()
 {
 	_hp = 100;
+	_direction = e_RIGHT;
+	_actionCur = NULL;
+	_actionPrev = NULL;
 }
 
 void PlayerObject::Action(void)
@@ -68,49 +71,53 @@ void PlayerObject::ActionProc(void)
 
 void PlayerObject::InputActionProc(void)
 {
+	int x, y;
 	if (!IsPlayer())
 		return;
+
+	x = GetCurX();
+	y = GetCurY();
 
 	switch(_actionInput)
 	{
 	case dfACTION_MOVE_UU:
-		if (GetCurY() <= dfRANGE_MOVE_TOP)
-			return;
+		if (y >= dfRANGE_MOVE_TOP)
+			y -= 1;			
 		
-		SetPostion(GetCurX(), GetCurY() - 1);
+		SetPostion(x, y);
 		if (IsEndFrame())
 		{
 			SetActionMove();
 		}
 		break;
 	case dfACTION_MOVE_DD:
-		if (GetCurY() >= dfRANGE_MOVE_BOTTOM)
-			return;
+		if (y <= dfRANGE_MOVE_BOTTOM)
+			y += 1;
 
-		SetPostion(GetCurX(), GetCurY() + 1);
+		SetPostion(x, y);
 		if (IsEndFrame())
 		{
 			SetActionMove();
 		}
 		break;
 	case dfACTION_MOVE_LL:
-		if (GetCurX() <= dfRANGE_MOVE_LEFT)
-			return;
+		if (GetCurX() >= dfRANGE_MOVE_LEFT)
+			x -= 1;
 
 		_direction = e_LEFT;
-		SetPostion(GetCurX() - 1, GetCurY());
+		SetPostion(x, y);
 		if (IsEndFrame())
 		{
 			SetActionMove();
 		}
 		break;
 	case dfACTION_MOVE_RR:
-		if (GetCurX() >= dfRANGE_MOVE_RIGHT)
-			return;
+		if (GetCurX() <= dfRANGE_MOVE_RIGHT)
+			x += 1;
 
 		_direction = e_RIGHT;
 
-		SetPostion(GetCurX() + 1, GetCurY());
+		SetPostion(x, y);
 		if (IsEndFrame())
 		{
 			SetActionMove();
@@ -119,14 +126,14 @@ void PlayerObject::InputActionProc(void)
 
 	// ´ë°¢¼±
 	case dfACTION_MOVE_LU:
-		if (GetCurX() <= dfRANGE_MOVE_LEFT)
-			return;
+		if (GetCurX() >= dfRANGE_MOVE_LEFT)
+			x -= 1;
 
-		if (GetCurY() <= dfRANGE_MOVE_TOP)
-			return;
+		if (GetCurY() >= dfRANGE_MOVE_TOP)
+			y -= 1;
 
 		_direction = e_LEFT;
-		SetPostion(GetCurX() - 1, GetCurY() - 1);
+		SetPostion(x, y);
 		if (IsEndFrame())
 		{
 			SetActionMove();
@@ -134,11 +141,11 @@ void PlayerObject::InputActionProc(void)
 		break;
 
 	case dfACTION_MOVE_LD:
-		if (GetCurX() <= dfRANGE_MOVE_LEFT)
-			return;
+		if (GetCurX() >= dfRANGE_MOVE_LEFT)
+			x -= 1;
 
-		if (GetCurY() >= dfRANGE_MOVE_BOTTOM)
-			return;
+		if (GetCurY() <= dfRANGE_MOVE_BOTTOM)
+			y += 1;
 
 		_direction = e_LEFT;
 
@@ -150,15 +157,15 @@ void PlayerObject::InputActionProc(void)
 		break;
 
 	case dfACTION_MOVE_RU:
-		if (GetCurX() >= dfRANGE_MOVE_RIGHT)
-			return;
+		if (GetCurX() <= dfRANGE_MOVE_RIGHT)
+			x += 1;
 
-		if (GetCurY() <= dfRANGE_MOVE_TOP)
-			return;
+		if (GetCurY() >= dfRANGE_MOVE_TOP)
+			y -= 1;
 
 		_direction = e_RIGHT;
 
-		SetPostion(GetCurX() + 1, GetCurY() -1);
+		SetPostion(x, y);
 		if (IsEndFrame())
 		{
 			SetActionMove();
@@ -166,11 +173,11 @@ void PlayerObject::InputActionProc(void)
 		break;
 
 	case dfACTION_MOVE_RD:
-		if (GetCurX() >= dfRANGE_MOVE_RIGHT)
-			return;
+		if (GetCurX() <= dfRANGE_MOVE_RIGHT)
+			x += 1;
 
-		if (GetCurY() >= dfRANGE_MOVE_BOTTOM)
-			return;
+		if (GetCurY() <= dfRANGE_MOVE_BOTTOM)
+			y += 1;
 
 		_direction = e_RIGHT;
 		SetPostion(GetCurX() + 1, GetCurY() + 1);
