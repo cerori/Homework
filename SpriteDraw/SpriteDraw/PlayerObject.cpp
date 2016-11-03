@@ -30,27 +30,30 @@ void PlayerObject::ActionProc(void)
 			ActionInput(dfACTION_STAND);
 			SetActionStand();
 		}
+		if (_actionCur != _actionInput && !IsEndFrame())
+			SetActionAttack1();
 
-		//if (PLAYER_ATTACK1_L01 < GetSpriteNow() && PLAYER_ATTACK1_L_MAX > GetSpriteNow())
-		//	SetActionAttack1();
 		break;
 	case dfACTION_ATTACK2:
-		SetActionAttack2();
 		if (IsEndFrame())
 		{
 			_isEndFrame = FALSE;
 			ActionInput(dfACTION_STAND);
 			SetActionStand();
 		}
+
+		if (_actionCur != _actionInput && !IsEndFrame())
+			SetActionAttack2();
 		break;
 	case dfACTION_ATTACK3:
-		SetActionAttack3();
 		if (IsEndFrame())
 		{
 			_isEndFrame = FALSE;
 			ActionInput(dfACTION_STAND);
 			SetActionStand();
 		}
+		if (_actionCur != _actionInput && !IsEndFrame())
+			SetActionAttack3();
 		break;
 	default:
 		InputActionProc();
@@ -68,32 +71,45 @@ void PlayerObject::InputActionProc(void)
 	case dfACTION_MOVE_UU:
 		if (GetCurY() <= dfRANGE_MOVE_TOP)
 			return;
-
-		SetActionMove();
+		
 		SetPostion(GetCurX(), GetCurY() - 1);
+		if (IsEndFrame())
+		{
+			SetActionMove();
+		}
 		break;
 	case dfACTION_MOVE_DD:
 		if (GetCurY() >= dfRANGE_MOVE_BOTTOM)
 			return;
 
-		SetActionMove();
 		SetPostion(GetCurX(), GetCurY() + 1);
+		if (IsEndFrame())
+		{
+			SetActionMove();
+		}
 		break;
 	case dfACTION_MOVE_LL:
 		if (GetCurX() <= dfRANGE_MOVE_LEFT)
 			return;
 
 		_direction = e_LEFT;
-		SetActionMove();
 		SetPostion(GetCurX() - 1, GetCurY());
+		if (IsEndFrame())
+		{
+			SetActionMove();
+		}
 		break;
 	case dfACTION_MOVE_RR:
 		if (GetCurX() >= dfRANGE_MOVE_RIGHT)
 			return;
 
 		_direction = e_RIGHT;
-		SetActionMove();
+
 		SetPostion(GetCurX() + 1, GetCurY());
+		if (IsEndFrame())
+		{
+			SetActionMove();
+		}
 		break;
 
 	// ´ë°¢¼±
@@ -105,8 +121,11 @@ void PlayerObject::InputActionProc(void)
 			return;
 
 		_direction = e_LEFT;
-		SetActionMove();
 		SetPostion(GetCurX() - 1, GetCurY() - 1);
+		if (IsEndFrame())
+		{
+			SetActionMove();
+		}
 		break;
 
 	case dfACTION_MOVE_LD:
@@ -117,8 +136,12 @@ void PlayerObject::InputActionProc(void)
 			return;
 
 		_direction = e_LEFT;
-		SetActionMove();
+
 		SetPostion(GetCurX() - 1, GetCurY() + 1);
+		if (IsEndFrame())
+		{
+			SetActionMove();
+		}
 		break;
 
 	case dfACTION_MOVE_RU:
@@ -129,8 +152,12 @@ void PlayerObject::InputActionProc(void)
 			return;
 
 		_direction = e_RIGHT;
-		SetActionMove();
+
 		SetPostion(GetCurX() + 1, GetCurY() -1);
+		if (IsEndFrame())
+		{
+			SetActionMove();
+		}
 		break;
 
 	case dfACTION_MOVE_RD:
@@ -141,16 +168,19 @@ void PlayerObject::InputActionProc(void)
 			return;
 
 		_direction = e_RIGHT;
-		SetActionMove();
 		SetPostion(GetCurX() + 1, GetCurY() + 1);
+		if (IsEndFrame())
+		{
+			SetActionMove();
+		}
 		break;
 	}
 
-	if (_actionInput != dfACTION_STAND)
+	if (IsEndFrame())
 	{
-		ActionInput(dfACTION_STAND);
 		SetActionStand();
 	}
+
 }
 
 BOOL PlayerObject::IsPlayer(void)
@@ -183,30 +213,38 @@ void PlayerObject::SetDriection(e_DIRECTION direction)
 
 void PlayerObject::SetActionAttack1()
 {
+	_actionCur = dfACTION_ATTACK1;
+
 	if (_direction == e_LEFT)
-		SetSprite(PLAYER_ATTACK1_L01, PLAYER_ATTACK1_L_MAX, dfACTION_ATTACK1);
+		SetSprite(PLAYER_ATTACK1_L01, PLAYER_ATTACK1_L_MAX, dfDELAY_ATTACK1);
 	else
-		SetSprite(PLAYER_ATTACK1_R01, PLAYER_ATTACK1_R_MAX, dfACTION_ATTACK1);
+		SetSprite(PLAYER_ATTACK1_R01, PLAYER_ATTACK1_R_MAX, dfDELAY_ATTACK1);
 }
 
 void PlayerObject::SetActionAttack2()
 {
+	_actionCur = dfACTION_ATTACK2;
+
 	if (_direction == e_LEFT)
-		SetSprite(PLAYER_ATTACK2_L01, PLAYER_ATTACK2_L_MAX, dfACTION_ATTACK2);
+		SetSprite(PLAYER_ATTACK2_L01, PLAYER_ATTACK2_L_MAX, dfDELAY_ATTACK2);
 	else
-		SetSprite(PLAYER_ATTACK2_R01, PLAYER_ATTACK2_R_MAX, dfACTION_ATTACK2);
+		SetSprite(PLAYER_ATTACK2_R01, PLAYER_ATTACK2_R_MAX, dfDELAY_ATTACK2);
 }
 
 void PlayerObject::SetActionAttack3()
 {
+	_actionCur = dfACTION_ATTACK3;
+
 	if (_direction == e_LEFT)
-		SetSprite(PLAYER_ATTACK3_L01, PLAYER_ATTACK3_L_MAX, dfACTION_ATTACK3);
+		SetSprite(PLAYER_ATTACK3_L01, PLAYER_ATTACK3_L_MAX, dfDELAY_ATTACK3);
 	else
-		SetSprite(PLAYER_ATTACK3_R01, PLAYER_ATTACK3_R_MAX, dfACTION_ATTACK3);
+		SetSprite(PLAYER_ATTACK3_R01, PLAYER_ATTACK3_R_MAX, dfDELAY_ATTACK3);
 }
 
 void PlayerObject::SetActionStand()
 {
+	_actionCur = dfACTION_STAND;
+
 	if (_direction == e_LEFT)
 		SetSprite(PLAYER_STAND_L01, PLAYER_STAND_L_MAX, dfDELAY_STAND);
 	else
@@ -215,6 +253,8 @@ void PlayerObject::SetActionStand()
 
 void PlayerObject::SetActionMove()
 {
+	_actionCur = dfACTION_MOVE;
+
 	if (_direction == e_LEFT)
 		SetSprite(PLAYER_MOVE_L01, PLAYER_MOVE_L_MAX, dfDELAY_MOVE);
 	else

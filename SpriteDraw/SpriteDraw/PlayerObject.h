@@ -26,6 +26,7 @@ protected:
 	BOOL _player;
 	int _hp;
 	DWORD _actionCur;
+	DWORD _actionPrev;
 	e_DIRECTION _direction;
 };
 

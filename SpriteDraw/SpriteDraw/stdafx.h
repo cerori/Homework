@@ -17,6 +17,9 @@
 #include <malloc.h>
 #include <memory.h>
 #include <tchar.h>
+#include <list>
+
+using namespace std;
 
 
 // TODO: 프로그램에 필요한 추가 헤더는 여기에서 참조합니다.
@@ -36,6 +39,7 @@
 
 #define dfACTION_PUSH		11
 #define dfACTION_STAND		12
+#define dfACTION_MOVE		13
 
 #define dfDELAY_STAND	5
 #define dfDELAY_MOVE	4

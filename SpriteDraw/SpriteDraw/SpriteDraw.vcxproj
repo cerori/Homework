@@ -80,6 +80,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseObject.h" />
+    <ClInclude Include="KeyMgr.h" />
     <ClInclude Include="LinkList.h" />
     <ClInclude Include="MainFunc.h" />
     <ClInclude Include="PlayerObject.h" />
@@ -92,6 +93,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BaseObject.cpp" />
+    <ClCompile Include="KeyMgr.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PlayerObject.cpp" />
     <ClCompile Include="ScreenDib.cpp" />

@@ -8,6 +8,7 @@
 #include "ScreenDib.h"
 #include "SpriteDib.h"
 #include "PlayerObject.h"
+#include "KeyMgr.h"
 
 #define MAX_LOADSTRING 100
 
@@ -23,8 +24,8 @@ BOOL				InitInstance(HINSTANCE, int);
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
 
+list<BaseObject *> g_list;
 
-CList<BaseObject *> *g_list = new CList<BaseObject *>();
 PlayerObject *g_player;
 
 // 윈도우 활성화 체크
@@ -32,6 +33,13 @@ BOOL g_isActiveApp;
 
 ScreenDib g_ScreenDib(640, 480, 32);
 SpriteDib g_SpriteDib(100, 0x00FFFFFF);
+
+cKey *g_keyMgr = cKey::GetInst();
+
+bool compare_axle_y(BaseObject *first, BaseObject *second)
+{
+	return (first->GetCurY() < second->GetCurY());
+}
 
 int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -253,7 +261,7 @@ void InitialGame(void)
 	g_player->SetObjectType(PLAYER);
 	g_player->SetSprite(PLAYER_STAND_L01, PLAYER_STAND_L_MAX, dfDELAY_STAND);
 
-	g_list->Add(g_player);
+	g_list.push_back(g_player);
 
 	// 적1
 	PlayerObject *g_player1 = new PlayerObject();
@@ -261,7 +269,7 @@ void InitialGame(void)
 	g_player1->SetPostion(200, 200);
 	g_player1->SetSprite(PLAYER_STAND_L01, PLAYER_STAND_L_MAX, dfDELAY_STAND);
 
-	g_list->Add(g_player1);
+	g_list.push_back(g_player1);
 
 	// 적2
 	PlayerObject *g_player2 = new PlayerObject();
@@ -269,7 +277,7 @@ void InitialGame(void)
 	g_player2->SetPostion(300, 200);
 	g_player2->SetSprite(PLAYER_STAND_R01, PLAYER_STAND_R_MAX, dfDELAY_STAND);
 
-	g_list->Add(g_player2);
+	g_list.push_back(g_player2);
 }
 
 void ContentLoad(void)
@@ -361,38 +369,38 @@ void KeyProcess(void)
 {
 	DWORD action = dfACTION_STAND;
 
-	if (GetAsyncKeyState(VK_UP) && 0x8000)
+	if (g_keyMgr->StayKeyDown(VK_UP))
 		action = dfACTION_MOVE_UU;
 
-	if (GetAsyncKeyState(VK_DOWN) && 0x8000)
+	if (g_keyMgr->StayKeyDown(VK_DOWN))
 		action = dfACTION_MOVE_DD;
 
-	if (GetAsyncKeyState(VK_LEFT) && 0x8000)
+	if (g_keyMgr->StayKeyDown(VK_LEFT))
 		action = dfACTION_MOVE_LL;
 
-	if (GetAsyncKeyState(VK_RIGHT) && 0x8000)
+	if (g_keyMgr->StayKeyDown(VK_RIGHT))
 		action = dfACTION_MOVE_RR;
 
 	//대각선
-	if (GetAsyncKeyState(VK_LEFT) && GetAsyncKeyState(VK_UP) && 0x8000)
+	if (g_keyMgr->StayKeyDown(VK_LEFT) && g_keyMgr->StayKeyDown(VK_UP))
 		action = dfACTION_MOVE_LU;
 
-	if (GetAsyncKeyState(VK_LEFT) && GetAsyncKeyState(VK_DOWN) && 0x8000)
+	if (g_keyMgr->StayKeyDown(VK_LEFT) && g_keyMgr->StayKeyDown(VK_DOWN))
 		action = dfACTION_MOVE_LD;
 
-	if (GetAsyncKeyState(VK_RIGHT) && GetAsyncKeyState(VK_UP) && 0x8000)
+	if (g_keyMgr->StayKeyDown(VK_RIGHT) && g_keyMgr->StayKeyDown(VK_UP))
 		action = dfACTION_MOVE_RU;
 
-	if (GetAsyncKeyState(VK_RIGHT) && GetAsyncKeyState(VK_DOWN) && 0x8000)
+	if (g_keyMgr->StayKeyDown(VK_RIGHT) && g_keyMgr->StayKeyDown(VK_DOWN))
 		action = dfACTION_MOVE_RD;
 
-	if (GetAsyncKeyState(e_Z) && 0x8000)
+	if (g_keyMgr->OnceKeyDown(e_Z))
 		action = dfACTION_ATTACK1;
 
-	if (GetAsyncKeyState(e_X) && 0x8000)
+	if (g_keyMgr->OnceKeyDown(e_X))
 		action = dfACTION_ATTACK2;
 
-	if (GetAsyncKeyState(e_C) && 0x8000)
+	if (g_keyMgr->OnceKeyDown(e_C))
 		action = dfACTION_ATTACK3;
 
 	g_player->ActionInput(action);
@@ -400,18 +408,13 @@ void KeyProcess(void)
 
 void Action(void)
 {
-	BaseObject *object;
+	list<BaseObject *>::iterator iter;
 
 	// 리스트의 모든 객체를 돌며 액션을 한다.
-	g_list->MoveHead();
-	while (g_list->HasNext() != FALSE)
+	for (iter = g_list.begin(); iter != g_list.end(); iter++)
 	{
-		if (g_list->GetNext(&object))
-		{
-			object->Action();
-		}
+		(*iter)->Action();
 	}
-
 }
 
 void Draw(void)
@@ -425,23 +428,14 @@ void Draw(void)
 
 	g_SpriteDib.DrawImage(0, 0, 0, pDest, 640, 480, 640 * 4);
 
-	/*
-	BYTE grayColor = 0;
-	for (count = 0; count < 480; count++)
-	{
-	memset(pDest, grayColor, 640 * 4);
-	pDest += destPitch;
-	grayColor++;
-	}
-	*/
+	g_list.sort(compare_axle_y);
 
-	g_list->MoveHead();
-	while (g_list->HasNext() != FALSE)
-	{
-		if (g_list->GetNext(&object))
-		{
-			object->Draw(pDest, 640, 480, 640 * 4);
-		}
+	list<BaseObject *>::iterator iter;
+
+	// 리스트의 모든 객체를 돌며 액션을 한다.
+	for (iter = g_list.begin(); iter != g_list.end(); iter++)
+	{		
+		(*iter)->Draw(pDest, 640, 480, 640 * 4);
 	}
 
 	g_ScreenDib.DrawBuffer(g_hWnd);
