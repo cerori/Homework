@@ -257,6 +257,7 @@ void InitialGame(void)
 
 	// »ç¿ëÀÚ
 	g_player = new PlayerObject();
+	g_player->SetHp(50);
 	g_player->SetPostion(100, 200);
 	g_player->SetObjectType(PLAYER);
 	g_player->SetSprite(PLAYER_STAND_L01, PLAYER_STAND_L_MAX, dfDELAY_STAND);
@@ -362,7 +363,7 @@ void Update(void)
 
 	Draw();
 
-	Sleep(0);
+	Sleep(0.02f*1000);
 }
 
 void KeyProcess(void)

@@ -97,7 +97,7 @@ void SpriteDib::DrawSprite(int spriteIndex, int drawX, int drawY,
 
 	//실제 이미지가 있는지 확인
 
-	spriteWidth = _stSprite[spriteIndex].width;
+	spriteWidth = (int)((long)_stSprite[spriteIndex].width * ((long)drawLen * 0.01));
 	spriteHeight = _stSprite[spriteIndex].height;
 	spritePitct = _stSprite[spriteIndex].pitch;
 	pSpriteImage = _stSprite[spriteIndex].pImage;

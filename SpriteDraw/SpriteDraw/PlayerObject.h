@@ -7,6 +7,7 @@
 class PlayerObject : public BaseObject
 {
 public:
+	PlayerObject();
 	virtual void Action(void);
 	virtual void Draw(BYTE *pDest, int destWidth, int destHeight, int destPitch);
 	void ActionProc(void);

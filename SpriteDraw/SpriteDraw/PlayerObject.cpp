@@ -4,6 +4,11 @@
 
 extern SpriteDib g_SpriteDib;
 
+PlayerObject::PlayerObject()
+{
+	_hp = 100;
+}
+
 void PlayerObject::Action(void)
 {
 	NextFrame();
@@ -12,7 +17,7 @@ void PlayerObject::Action(void)
 
 void PlayerObject::Draw(BYTE *pDest, int destWidth, int destHeight, int destPitch)
 {
-	g_SpriteDib.DrawSprite(eGUAGE_HP, GetCurX() - 35, GetCurY() + 9, pDest, destWidth, destHeight, destPitch);
+	g_SpriteDib.DrawSprite(eGUAGE_HP, GetCurX() - 35, GetCurY() + 9, pDest, destWidth, destHeight, destPitch, GetHp());
 
 	g_SpriteDib.DrawSprite(eSHADOW, GetCurX(), GetCurY(), pDest, destWidth, destHeight, destPitch);
 
