@@ -1,4 +1,0 @@
-﻿  online_star.cpp
-c:\users\user\documents\visual studio 2015\projects\online_star\online_star\online_star.cpp(369): warning C4838: 'int'에서 'SHORT'(으)로의 변환에는 축소 변환이 필요합니다.
-  online_star.vcxproj -> C:\Users\user\documents\visual studio 2015\Projects\online_star\Debug\online_star.exe
-  online_star.vcxproj -> C:\Users\user\documents\visual studio 2015\Projects\online_star\Debug\online_star.pdb (Full PDB)
