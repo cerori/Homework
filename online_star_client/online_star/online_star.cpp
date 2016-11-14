@@ -32,7 +32,7 @@ PACKET clients[FD_SETSIZE];
 
 int my_id = -1;
 int totalClient = 0;
-char input_ip[20] = "127.0.0.1";
+char input_ip[20] = "192.168.10.10";
 
 SOCKET sock;
 
@@ -53,8 +53,8 @@ void err_display(char *msg);
 
 int main()
 {
-	//cout << "아이피를 입력하세요 :";
-	//cin >> input_ip;
+	cout << "아이피를 입력하세요 :";
+	cin >> input_ip;
 	RemoveCursor();
 
 	printf("InitSock\n");
