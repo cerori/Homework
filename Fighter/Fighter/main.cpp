@@ -128,6 +128,8 @@ int main(void)
 					Enemy[i].x = 75;
 					Enemy[i].Delta = -1;
 				}
+
+				// 적군이 같은 곳에 나타나지 않도록 방지
 				for (;;) 
 				{
 					Enemy[i].y = (rand() % 10) + 1;
@@ -144,6 +146,8 @@ int main(void)
 						break;
 					}
 				}
+
+				// 적군 이동 속도 조절
 				Enemy[i].nFrame = Enemy[i].nStay = (rand() % 6) + 1;
 				Enemy[i].Type = rand() % (sizeof(arEnemy) / sizeof(arEnemy[0]));
 				Enemy[i].exist = TRUE;
