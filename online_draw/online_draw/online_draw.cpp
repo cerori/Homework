@@ -141,14 +141,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			switch (WSAGETSELECTEVENT(lParam))
 			{
 			case FD_READ:
+				// recvQ 에 넣기 위하여 버퍼 선언 필요
 				retval = recv(wParam, (char *)&packet, sizeof(packet), 0);
 				if (retval == SOCKET_ERROR)
 					break;
 
-				hdc = GetDC(hWnd);
-				MoveToEx(hdc, packet.iStartX, packet.iStartY, NULL);
-				LineTo(hdc, packet.iEndX, packet.iEndY);
-				ReleaseDC(hWnd, hdc);
+				// recvQ.put
+
+				// while (1)
+				{
+					hdc = GetDC(hWnd);
+					MoveToEx(hdc, packet.iStartX, packet.iStartY, NULL);
+					LineTo(hdc, packet.iEndX, packet.iEndY);
+					ReleaseDC(hWnd, hdc);
+				}
 				break;
 			}
 		}

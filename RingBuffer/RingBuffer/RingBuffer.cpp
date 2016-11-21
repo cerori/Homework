@@ -1,11 +1,49 @@
-// RingBuffer.cpp : 콘솔 응용 프로그램에 대한 진입점을 정의합니다.
-//
-
 #include "stdafx.h"
+#include "RingBuffer.h"
 
-
-int main()
+RingBuffer::RingBuffer(void)
 {
-    return 0;
+	_data = new char[_max_size];
+	_read = _write = _size = 0;
 }
 
+RingBuffer::~RingBuffer(void)
+{
+	delete[] _data;
+}
+
+BOOL RingBuffer::Enqueue(char * in, int size)
+{
+	int write = (_write + 1) % _max_queue;
+
+	// 꽉 찼음
+	if (write == _read)
+		return FALSE;
+		
+	_size += size;
+
+	// 다음으로 이동
+	_write = write;
+
+	return TRUE;
+}
+
+BOOL RingBuffer::Dequeue(char * out, int size)
+{
+	return 0;
+}
+
+int RingBuffer::GetUseSize(void)
+{
+	return 0;
+}
+
+int RingBuffer::GetFreeSize(void)
+{
+	return 0;
+}
+
+int RingBuffer::Peek(char * out, int size)
+{
+	return 0;
+}
