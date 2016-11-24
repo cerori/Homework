@@ -46,17 +46,7 @@ int main()
 		memset(tmp, 0, 100);
 		memset(szLog, 0, 100);
 		randSize = rand() % (dataSize + 1);
-		//while (1)
-		//{
-		//	randSize = rand() % (dataSize + 1);
-		//	if (randSize != 0)
-		//		break;
-		//}
-		//printf("random read size %d\n", randSize);
-	
-		//randSize = rand() % (dataSize + 1);
-		//printf("random read size %d\n", randSize);
-	
+
 		//retPeekDataSize = rb->Peek(tmp1, randSize);
 		retval = rb->DequeueWrap(tmp, randSize);
 		//if (memcmp(tmp, tmp1, retPeekDataSize) != 0)
@@ -76,8 +66,7 @@ int main()
 		//PrintSize();
 
 		printf("%s", tmp);
-		sprintf_s(szLog, 100, "%d", i);
-		FileLog(logFilename, szLog);
+		FileLog(logFilename, "%d", i);
 	}
 
     return 0;
