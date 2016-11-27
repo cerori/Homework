@@ -1,4 +1,3 @@
-#pragma once
 #ifndef __MAIN_FUNCTION__
 #define __MAIN_FUNCTION__
 

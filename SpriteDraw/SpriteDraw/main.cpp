@@ -2,13 +2,16 @@
 //
 
 #include "stdafx.h"
-#include "LinkList.h"
 #include "MainFunc.h"
 #include "SpriteDraw.h"
 #include "ScreenDib.h"
 #include "SpriteDib.h"
 #include "PlayerObject.h"
 #include "KeyMgr.h"
+#include "Protocol.h"
+#include "FileLog.h"
+#include "RingBuffer.h"
+#include "Network.h"
 
 #define MAX_LOADSTRING 100
 
@@ -22,12 +25,21 @@ TCHAR szWindowClass[MAX_LOADSTRING];			// 기본 창 클래스 이름입니다.
 ATOM				MyRegisterClass(HINSTANCE hInstance);
 BOOL				InitInstance(HINSTANCE, int);
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
-INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
 
+// 함수 선언
+void InitWSA(void);
+
+void err_quit(WCHAR *msg);
+void err_display(WCHAR *msg);
 
 // 사용자 전역
-using namespace logging::trivial;
-src::severity_logger< severity_level > lg;
+SOCKET g_sock;
+WCHAR g_ip[] = L"127.0.0.1";
+BOOL g_isCanSendPacket;
+BOOL g_successConnect;
+
+RingBuffer RecvQ; 
+RingBuffer SendQ;
 
 list<BaseObject *> g_list;
 
@@ -38,7 +50,6 @@ BOOL g_isActiveApp;
 
 ScreenDib g_ScreenDib(640, 480, 32);
 SpriteDib g_SpriteDib(100, 0x00FFFFFF);
-void InitLog(void);
 
 cKey *g_keyMgr = cKey::GetInst();
 
@@ -57,7 +68,6 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 
  	// TODO: 여기에 코드를 입력합니다.
 	MSG msg;
-	HACCEL hAccelTable;
 
 	// 전역 문자열을 초기화합니다.
 	LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -70,12 +80,8 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 		return FALSE;
 	}
 
-	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_SPRITEDRAW));
-
-	InitLog();
-	logging::add_common_attributes();
-
 	InitialGame();
+	InitWSA();
 
 	// 기본 메시지 루프입니다.
 	while (1)
@@ -116,7 +122,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	wcex.hIcon			= LoadIcon(hInstance, MAKEINTRESOURCE(IDI_SPRITEDRAW));
 	wcex.hCursor		= LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground	= (HBRUSH)(COLOR_WINDOW+1);
-	wcex.lpszMenuName	= MAKEINTRESOURCE(IDC_SPRITEDRAW);
+	wcex.lpszMenuName   = NULL;
 	wcex.lpszClassName	= szWindowClass;
 	wcex.hIconSm		= LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
@@ -196,26 +202,16 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	int wmId, wmEvent;
 	PAINTSTRUCT ps;
 	HDC hdc;
 
 	switch (message)
 	{
-	case WM_COMMAND:
-		wmId    = LOWORD(wParam);
-		wmEvent = HIWORD(wParam);
-		// 메뉴 선택을 구문 분석합니다.
-		switch (wmId)
+	case WM_USER_SOCKET:
+		if ( ! NetworkProc(wParam, lParam))
 		{
-		case IDM_ABOUT:
-			DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-			break;
-		case IDM_EXIT:
-			DestroyWindow(hWnd);
-			break;
-		default:
-			return DefWindowProc(hWnd, message, wParam, lParam);
+			MessageBox(g_hWnd, L"접속이 종료되었습니다.", L"알림", MB_OK);
+			return 0;
 		}
 		break;
 	case WM_PAINT:
@@ -236,45 +232,38 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-// 정보 대화 상자의 메시지 처리기입니다.
-INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+void InitWSA(void)
 {
-	UNREFERENCED_PARAMETER(lParam);
-	switch (message)
-	{
-	case WM_INITDIALOG:
-		return (INT_PTR)TRUE;
+	int retval;
 
-	case WM_COMMAND:
-		if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
-		{
-			EndDialog(hDlg, LOWORD(wParam));
-			return (INT_PTR)TRUE;
-		}
-		break;
-	}
-	return (INT_PTR)FALSE;
+	g_isCanSendPacket = FALSE;
+	g_successConnect = FALSE;
+
+	// 윈속 초기화
+	WSADATA wsa;
+	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
+		return;
+
+	// socket()
+	g_sock = socket(AF_INET, SOCK_STREAM, 0);
+	if (g_sock == INVALID_SOCKET) err_quit(L"socket()");
+
+	retval = WSAAsyncSelect(g_sock, g_hWnd, WM_USER_SOCKET, FD_READ | FD_WRITE | FD_CONNECT | FD_CLOSE);
+	if (retval == SOCKET_ERROR) err_quit(L"WSAAsyncSelect()");
+
+	// bind()
+	SOCKADDR_IN serveraddr;
+	ZeroMemory(&serveraddr, sizeof(serveraddr));
+	serveraddr.sin_family = AF_INET;
+	InetPton(AF_INET, g_ip, &serveraddr.sin_addr.s_addr);
+	serveraddr.sin_port = htons(NETWORK_PORT);
+
+	retval = connect(g_sock, (SOCKADDR *)&serveraddr, sizeof(serveraddr));
 }
 
 /*
 	사용자 함수
 */
-
-void InitLog(void)
-{
-	logging::add_file_log
-	(
-		keywords::file_name = "sample_%N.log",
-		keywords::rotation_size = 10 * 1024 * 1024, //10mb마다 rotate
-		keywords::time_based_rotation = sinks::file::rotation_at_time_point(0, 0, 0), //12시마다 rotate
-		keywords::format = "[%TimeStamp%]: %Message%"
-	);
-
-	logging::core::get()->set_filter
-	(
-		logging::trivial::severity >= logging::trivial::trace
-	);
-}
 
 void InitialGame(void)
 {
@@ -388,9 +377,7 @@ void Update(void)
 
 	Draw();
 
-	BOOST_LOG_SEV(lg, info) << "A trace severity message";
-
-	Sleep(0.02f*1000);
+	Sleep(0.02f * 1000);
 }
 
 /*
@@ -470,3 +457,30 @@ void Draw(void)
 
 	g_ScreenDib.DrawBuffer(g_hWnd);
 }
+
+void err_quit(WCHAR *msg)
+{
+	LPVOID lpMsgBuf;
+	FormatMessage(
+		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+		NULL, WSAGetLastError(),
+		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		(LPTSTR)&lpMsgBuf, 0, NULL);
+	MessageBox(NULL, (LPCTSTR)lpMsgBuf, (LPWSTR)msg, MB_ICONERROR);
+	LocalFree(lpMsgBuf);
+	exit(1);
+}
+
+// 소켓 함수 오류 출력
+void err_display(WCHAR *msg)
+{
+	LPVOID lpMsgBuf;
+	FormatMessage(
+		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+		NULL, WSAGetLastError(),
+		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		(LPTSTR)&lpMsgBuf, 0, NULL);
+	wprintf(L"[%s] %s", msg, (LPWSTR)&lpMsgBuf);
+	LocalFree(lpMsgBuf);
+}
+

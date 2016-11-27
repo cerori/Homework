@@ -52,7 +52,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions);_WINSOCK_DEPRECATED_NO_WARNINGS</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>
       </AdditionalIncludeDirectories>
@@ -83,11 +83,17 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\online_draw\online_draw\FileLog.h" />
+    <ClInclude Include="..\..\online_draw\online_draw\RingBuffer.h" />
     <ClInclude Include="BaseObject.h" />
     <ClInclude Include="KeyMgr.h" />
     <ClInclude Include="LinkList.h" />
     <ClInclude Include="MainFunc.h" />
+    <ClInclude Include="MakePacket.h" />
+    <ClInclude Include="Network.h" />
+    <ClInclude Include="PacketProc.h" />
     <ClInclude Include="PlayerObject.h" />
+    <ClInclude Include="Protocol.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="ScreenDib.h" />
     <ClInclude Include="SpriteDib.h" />
@@ -96,9 +102,12 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\online_draw\online_draw\FileLog.cpp" />
+    <ClCompile Include="..\..\online_draw\online_draw\RingBuffer.cpp" />
     <ClCompile Include="BaseObject.cpp" />
     <ClCompile Include="KeyMgr.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Network.cpp" />
     <ClCompile Include="PlayerObject.cpp" />
     <ClCompile Include="ScreenDib.cpp" />
     <ClCompile Include="SpriteDib.cpp" />
