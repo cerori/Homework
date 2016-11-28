@@ -73,7 +73,7 @@ BOOL SpriteDib::LoadDibSprite(int spriteIndex, WCHAR *fileName, int centerPointX
 
 void SpriteDib::ReleaseSprite(int spriteIndex)
 {
-	delete _stSprite[spriteIndex].pImage;
+	//delete _stSprite[spriteIndex].pImage;
 }
 
 void SpriteDib::DrawSprite(int spriteIndex, int drawX, int drawY,

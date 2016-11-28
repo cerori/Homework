@@ -10,6 +10,8 @@ public:
 	virtual void Action() = 0;
 	virtual void Draw(BYTE *pDest, int destWidth, int destHeight, int destPitch) = 0;
 	void ActionInput(DWORD actionInput);
+	DWORD GetId(void);
+	void SetId(DWORD id);
 	int GetCurX(void);
 	int GetCurY(void);
 	int GetObjectId(void);
@@ -22,6 +24,7 @@ public:
 	void SetSprite(int start, int max, int frameDelay);
 
 protected:
+	DWORD _id;
 	bool _isEndFrame;
 	DWORD _actionInput;
 	int _curX;

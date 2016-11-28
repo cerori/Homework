@@ -145,8 +145,8 @@ enum OBJECT_TYPE
 
 enum e_DIRECTION
 {
-	e_LEFT,
-	e_RIGHT
+	e_LEFT = dfACTION_MOVE_LL,
+	e_RIGHT = dfACTION_MOVE_RR
 };
 
 enum e_KEY_MAP

@@ -6,8 +6,13 @@
 #define WM_USER_SOCKET (WM_USER + 1)
 #define NETWORK_PORT	5000
 
+#define BUFFER_SIZE	1000
+#define SEND_BUFFER_SIZE	BUFFER_SIZE
+#define RECV_BUFFER_SIZE	BUFFER_SIZE
+
+
 #pragma pack(1)
-struct PACKET_HEADER
+struct st_PACKET_HEADER
 {
 	BYTE code;
 	BYTE size;
@@ -15,55 +20,57 @@ struct PACKET_HEADER
 	BYTE temp;
 };
 
-struct PACKET_BOTH_CHARACTER
+struct st_PACKET_CHARACTER
 {
-	long id;
+	DWORD id;
 	BYTE direction;
-	int x;
-	int y;
-	char hp;
+	WORD x;
+	WORD y;
+	BYTE hp;
 };
 
-struct PACKET_SC_DELETE
+struct st_PACKET_SC_DELETE
 {
-	long id;
+	DWORD id;
 };
 
-struct PACKET_CS_MOVE
-{
-	BYTE direction;
-	int x;
-	int y;
-};
-
-struct PACKET_SC_MOVE
-{
-	long id;
-	BYTE direction;
-	int x;
-	int y;
-};
-
-struct PACKET_CS_ATTACK
+// START, STOP °â¿ë
+typedef struct st_PACKET_CS_MOVE
 {
 	BYTE direction;
-	int x;
-	int y;
-};
+	WORD x;
+	WORD y;
+} st_PACKET_CS_MOVE_START, st_PACKET_CS_MOVE_STOP;
 
-struct PACKET_SC_ATTACK
+// START, STOP °â¿ë
+typedef struct st_PACKET_SC_MOVE
 {
-	long id;
+	DWORD id;
 	BYTE direction;
-	int x;
-	int y;
+	WORD x;
+	WORD y;
+} st_PACKET_SC_MOVE_START, st_PACKET_SC_MOVE_STOP;
+
+struct st_PACKET_CS_ATTACK
+{
+	BYTE direction;
+	WORD x;
+	WORD y;
 };
 
-struct PACKET_SC_DAMAGE
+struct st_PACKET_SC_ATTACK
 {
-	long fromId;
-	long toId;
-	char hp;
+	DWORD id;
+	BYTE direction;
+	WORD x;
+	WORD y;
+};
+
+struct st_PACKET_SC_DAMAGE
+{
+	DWORD fromId;
+	DWORD toId;
+	BYTE hp;
 };
 #pragma pack()
 
