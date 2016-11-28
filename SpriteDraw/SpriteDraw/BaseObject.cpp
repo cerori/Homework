@@ -11,6 +11,16 @@ void BaseObject::ActionInput(DWORD actionInput)
 	_actionInput = actionInput;
 }
 
+DWORD BaseObject::GetId(void)
+{
+	return _id;
+}
+
+void BaseObject::SetId(DWORD id)
+{
+	_id = id;
+}
+
 int BaseObject::GetCurX(void)
 {
 	return _curX;

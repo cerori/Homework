@@ -12,6 +12,7 @@
 #include "FileLog.h"
 #include "RingBuffer.h"
 #include "Network.h"
+#include "Packet.h"
 
 #define MAX_LOADSTRING 100
 
@@ -37,13 +38,16 @@ SOCKET g_sock;
 WCHAR g_ip[] = L"127.0.0.1";
 BOOL g_isCanSendPacket;
 BOOL g_successConnect;
+BOOL g_beforeAction;
+BOOL g_currentMoveDirection;
+BOOL g_isMoveChange = FALSE;
 
 RingBuffer RecvQ; 
 RingBuffer SendQ;
 
 list<BaseObject *> g_list;
 
-PlayerObject *g_player;
+PlayerObject *g_my_player;
 
 // 윈도우 활성화 체크
 BOOL g_isActiveApp;
@@ -80,6 +84,7 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 		return FALSE;
 	}
 
+	ContentLoad();
 	InitialGame();
 	InitWSA();
 
@@ -96,7 +101,8 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 		}
 		else
 		{
-			Update();
+			if (g_successConnect && g_my_player != NULL)
+				Update();
 		}
 	}
 
@@ -267,32 +273,30 @@ void InitWSA(void)
 
 void InitialGame(void)
 {
-	ContentLoad();
+	//// 사용자
+	//g_player = new PlayerObject();
+	//g_player->SetHp(50);
+	//g_player->SetPostion(100, 200);
+	//g_player->SetObjectType(PLAYER);
+	//g_player->SetSprite(PLAYER_STAND_R01, PLAYER_STAND_R_MAX, dfDELAY_STAND);
 
-	// 사용자
-	g_player = new PlayerObject();
-	g_player->SetHp(50);
-	g_player->SetPostion(100, 200);
-	g_player->SetObjectType(PLAYER);
-	g_player->SetSprite(PLAYER_STAND_R01, PLAYER_STAND_R_MAX, dfDELAY_STAND);
+	//g_list.push_back(g_player);
 
-	g_list.push_back(g_player);
+	//// 적1
+	//PlayerObject *g_player1 = new PlayerObject();
+	//g_player1->SetObjectType(ENEMY);
+	//g_player1->SetPostion(200, 200);
+	//g_player1->SetSprite(PLAYER_STAND_L01, PLAYER_STAND_L_MAX, dfDELAY_STAND);
 
-	// 적1
-	PlayerObject *g_player1 = new PlayerObject();
-	g_player1->SetObjectType(ENEMY);
-	g_player1->SetPostion(200, 200);
-	g_player1->SetSprite(PLAYER_STAND_L01, PLAYER_STAND_L_MAX, dfDELAY_STAND);
+	//g_list.push_back(g_player1);
 
-	g_list.push_back(g_player1);
+	//// 적2
+	//PlayerObject *g_player2 = new PlayerObject();
+	//g_player2->SetObjectType(ENEMY);
+	//g_player2->SetPostion(300, 200);
+	//g_player2->SetSprite(PLAYER_STAND_R01, PLAYER_STAND_R_MAX, dfDELAY_STAND);
 
-	// 적2
-	PlayerObject *g_player2 = new PlayerObject();
-	g_player2->SetObjectType(ENEMY);
-	g_player2->SetPostion(300, 200);
-	g_player2->SetSprite(PLAYER_STAND_R01, PLAYER_STAND_R_MAX, dfDELAY_STAND);
-
-	g_list.push_back(g_player2);
+	//g_list.push_back(g_player2);
 }
 
 void ContentLoad(void)
@@ -385,44 +389,110 @@ void Update(void)
 */
 void KeyProcess(void)
 {
+	st_PACKET_HEADER header;
+	char packet[20];
+	int packetSize = 0;
 	DWORD action = dfACTION_STAND;
 
 	if (g_keyMgr->StayKeyDown(VK_UP))
+	{
+		if (g_beforeAction != dfACTION_MOVE_UU)
+		{
+			packetSize = sizeof(st_PACKET_CS_MOVE_START);
+			MakePacket_MoveStart(&header, (st_PACKET_CS_MOVE_START *)packet, dfACTION_MOVE_UU, g_my_player->GetCurX(), g_my_player->GetCurY());
+		}
+
 		action = dfACTION_MOVE_UU;
+	}
 
 	if (g_keyMgr->StayKeyDown(VK_DOWN))
+	{
+		if (g_beforeAction != dfACTION_MOVE_DD)
+		{
+			packetSize = sizeof(st_PACKET_CS_MOVE_START);
+			MakePacket_MoveStart(&header, (st_PACKET_CS_MOVE_START *)packet, dfACTION_MOVE_DD, g_my_player->GetCurX(), g_my_player->GetCurY());
+		}
+
 		action = dfACTION_MOVE_DD;
+	}
 
 	if (g_keyMgr->StayKeyDown(VK_LEFT))
+	{
+		if (g_beforeAction != dfACTION_MOVE_LL)
+		{
+			packetSize = sizeof(st_PACKET_CS_MOVE_START);
+			MakePacket_MoveStart(&header, (st_PACKET_CS_MOVE_START *)packet, dfACTION_MOVE_LL, g_my_player->GetCurX(), g_my_player->GetCurY());
+		}
+
 		action = dfACTION_MOVE_LL;
+	}
 
 	if (g_keyMgr->StayKeyDown(VK_RIGHT))
+	{
+		if (g_beforeAction != dfACTION_MOVE_RR)
+		{
+			packetSize = sizeof(st_PACKET_CS_MOVE_START);
+			MakePacket_MoveStart(&header, (st_PACKET_CS_MOVE_START *)packet, dfACTION_MOVE_RR, g_my_player->GetCurX(), g_my_player->GetCurY());
+		}
+
 		action = dfACTION_MOVE_RR;
+	}
 
 	//대각선
 	if (g_keyMgr->StayKeyDown(VK_LEFT) && g_keyMgr->StayKeyDown(VK_UP))
+	{
+
 		action = dfACTION_MOVE_LU;
+	}
 
 	if (g_keyMgr->StayKeyDown(VK_LEFT) && g_keyMgr->StayKeyDown(VK_DOWN))
+	{
+
 		action = dfACTION_MOVE_LD;
+	}
 
 	if (g_keyMgr->StayKeyDown(VK_RIGHT) && g_keyMgr->StayKeyDown(VK_UP))
+	{
+
 		action = dfACTION_MOVE_RU;
+	}
 
 	if (g_keyMgr->StayKeyDown(VK_RIGHT) && g_keyMgr->StayKeyDown(VK_DOWN))
+	{
+
 		action = dfACTION_MOVE_RD;
+	}
 
 	// 공격
 	if (g_keyMgr->OnceKeyDown(e_Z))
+	{
+
 		action = dfACTION_ATTACK1;
+	}
 
 	if (g_keyMgr->OnceKeyDown(e_X))
+	{
+
 		action = dfACTION_ATTACK2;
+	}
 
 	if (g_keyMgr->OnceKeyDown(e_C))
+	{
 		action = dfACTION_ATTACK3;
+	}
 
-	g_player->ActionInput(action);
+	if (action == dfACTION_STAND)
+	{
+		packetSize = sizeof(st_PACKET_CS_MOVE_STOP);
+		MakePacket_MoveStop(&header, (st_PACKET_CS_MOVE_STOP *)packet, g_my_player->GetDirection(), g_my_player->GetCurX(), g_my_player->GetCurY());
+	}
+
+	g_my_player->ActionInput(action);
+
+	if (g_beforeAction != action)
+		SendPacket(&header, (char *)&packet, packetSize);
+
+	g_beforeAction = action;
 }
 
 void Action(void)
