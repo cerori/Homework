@@ -72,8 +72,9 @@ void PlayerObject::ActionProc(void)
 void PlayerObject::InputActionProc(void)
 {
 	int x, y;
-	if (!IsPlayer())
-		return;
+
+	//if (!IsPlayer())
+	//	return;
 
 	x = GetCurX();
 	y = GetCurY();
