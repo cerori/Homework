@@ -14,9 +14,9 @@ public:
 	void InputActionProc(void);
 	BOOL IsPlayer(void);
 	int GetHp(void);
-	e_DIRECTION GetDirection(void);
+	WORD GetDirection(void);
 	void SetHp(int hp);
-	void SetDriection(e_DIRECTION direction);
+	void SetDriection(WORD direction);
 	void SetActionAttack1();
 	void SetActionAttack2();
 	void SetActionAttack3();
@@ -28,7 +28,7 @@ protected:
 	int _hp;
 	DWORD _actionCur;
 	DWORD _actionPrev;
-	e_DIRECTION _direction;
+	WORD _direction;
 };
 
 

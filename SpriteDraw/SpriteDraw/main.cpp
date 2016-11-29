@@ -7,6 +7,7 @@
 #include "ScreenDib.h"
 #include "SpriteDib.h"
 #include "PlayerObject.h"
+#include "EffectObject.h"
 #include "KeyMgr.h"
 #include "Protocol.h"
 #include "FileLog.h"
@@ -45,9 +46,12 @@ BOOL g_isMoveChange = FALSE;
 RingBuffer RecvQ; 
 RingBuffer SendQ;
 
+DWORD g_lineNum = 0;
+
 list<BaseObject *> g_list;
 
 PlayerObject *g_my_player;
+EffectObject *g_effect;
 
 // 윈도우 활성화 체크
 BOOL g_isActiveApp;
@@ -217,6 +221,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		if ( ! NetworkProc(wParam, lParam))
 		{
 			MessageBox(g_hWnd, L"접속이 종료되었습니다.", L"알림", MB_OK);
+			PostQuitMessage(0);
 			return 0;
 		}
 		break;
@@ -235,6 +240,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
+
 	return 0;
 }
 
@@ -273,6 +279,11 @@ void InitWSA(void)
 
 void InitialGame(void)
 {
+	g_effect = new EffectObject();
+	g_effect->SetSprite(EFFECT_SPARK_01, EFFECT_SPARK_MAX, dfDELAY_EFFECT);
+
+	g_list.push_back(g_effect);
+
 	//// 사용자
 	//g_player = new PlayerObject();
 	//g_player->SetHp(50);
@@ -368,8 +379,16 @@ void ContentLoad(void)
 	g_SpriteDib.LoadDibSprite(56, L"SpriteData/Attack3_R_05.bmp", 71, 90);
 	g_SpriteDib.LoadDibSprite(57, L"SpriteData/Attack3_R_06.bmp", 71, 90);
 
-	g_SpriteDib.LoadDibSprite(58, L"SpriteData/HPGuage.bmp", 0, 0);
-	g_SpriteDib.LoadDibSprite(59, L"SpriteData/Shadow.bmp", 32, 4);
+	// 타격 효과
+	g_SpriteDib.LoadDibSprite(58, L"SpriteData/xSpark_1.bmp", 70, 70);
+	g_SpriteDib.LoadDibSprite(59, L"SpriteData/xSpark_2.bmp", 70, 70);
+	g_SpriteDib.LoadDibSprite(60, L"SpriteData/xSpark_3.bmp", 70, 70);
+	g_SpriteDib.LoadDibSprite(61, L"SpriteData/xSpark_4.bmp", 70, 70);
+
+	g_SpriteDib.LoadDibSprite(62, L"SpriteData/HPGuage.bmp", 0, 0);
+	g_SpriteDib.LoadDibSprite(63, L"SpriteData/Shadow.bmp", 32, 4);
+
+
 }
 
 void Update(void)
@@ -393,6 +412,9 @@ void KeyProcess(void)
 	char packet[20];
 	int packetSize = 0;
 	DWORD action = dfACTION_STAND;
+
+	if (g_my_player == NULL)
+		return;
 
 	if (g_keyMgr->StayKeyDown(VK_UP))
 	{
@@ -441,54 +463,95 @@ void KeyProcess(void)
 	//대각선
 	if (g_keyMgr->StayKeyDown(VK_LEFT) && g_keyMgr->StayKeyDown(VK_UP))
 	{
+		if (g_beforeAction != dfACTION_MOVE_RR)
+		{
+			packetSize = sizeof(st_PACKET_CS_MOVE_START);
+			MakePacket_MoveStart(&header, (st_PACKET_CS_MOVE_START *)packet, dfACTION_MOVE_RR, g_my_player->GetCurX(), g_my_player->GetCurY());
+		}
 
 		action = dfACTION_MOVE_LU;
 	}
 
 	if (g_keyMgr->StayKeyDown(VK_LEFT) && g_keyMgr->StayKeyDown(VK_DOWN))
 	{
+		if (g_beforeAction != dfACTION_MOVE_RR)
+		{
+			packetSize = sizeof(st_PACKET_CS_MOVE_START);
+			MakePacket_MoveStart(&header, (st_PACKET_CS_MOVE_START *)packet, dfACTION_MOVE_RR, g_my_player->GetCurX(), g_my_player->GetCurY());
+		}
 
 		action = dfACTION_MOVE_LD;
 	}
 
 	if (g_keyMgr->StayKeyDown(VK_RIGHT) && g_keyMgr->StayKeyDown(VK_UP))
 	{
+		if (g_beforeAction != dfACTION_MOVE_RR)
+		{
+			packetSize = sizeof(st_PACKET_CS_MOVE_START);
+			MakePacket_MoveStart(&header, (st_PACKET_CS_MOVE_START *)packet, dfACTION_MOVE_RR, g_my_player->GetCurX(), g_my_player->GetCurY());
+		}
 
 		action = dfACTION_MOVE_RU;
 	}
 
 	if (g_keyMgr->StayKeyDown(VK_RIGHT) && g_keyMgr->StayKeyDown(VK_DOWN))
 	{
+		if (g_beforeAction != dfACTION_MOVE_RR)
+		{
+			packetSize = sizeof(st_PACKET_CS_MOVE_START);
+			MakePacket_MoveStart(&header, (st_PACKET_CS_MOVE_START *)packet, dfACTION_MOVE_RR, g_my_player->GetCurX(), g_my_player->GetCurY());
+		}
 
 		action = dfACTION_MOVE_RD;
 	}
 
-	// 공격
+	// 공격1
 	if (g_keyMgr->OnceKeyDown(e_Z))
 	{
+		if (g_beforeAction != dfACTION_ATTACK1)
+		{
+			packetSize = sizeof(st_PACKET_CS_MOVE_START);
+			MakePacket_Attack1(&header, (st_PACKET_CS_ATTACK *)packet, g_my_player->GetDirection(), g_my_player->GetCurX(), g_my_player->GetCurY());
+		}
 
 		action = dfACTION_ATTACK1;
 	}
 
+	// 공격2
 	if (g_keyMgr->OnceKeyDown(e_X))
 	{
+		if (g_beforeAction != dfACTION_ATTACK2)
+		{
+			packetSize = sizeof(st_PACKET_CS_MOVE_START);
+			MakePacket_Attack2(&header, (st_PACKET_CS_ATTACK *)packet, g_my_player->GetDirection(), g_my_player->GetCurX(), g_my_player->GetCurY());
+		}
 
 		action = dfACTION_ATTACK2;
 	}
 
+	// 공격3
 	if (g_keyMgr->OnceKeyDown(e_C))
 	{
+		if (g_beforeAction != dfACTION_ATTACK3)
+		{
+			packetSize = sizeof(st_PACKET_CS_MOVE_START);
+			MakePacket_Attack3(&header, (st_PACKET_CS_ATTACK *)packet, g_my_player->GetDirection(), g_my_player->GetCurX(), g_my_player->GetCurY());
+		}
+
 		action = dfACTION_ATTACK3;
 	}
 
+	// 기본 동작
 	if (action == dfACTION_STAND)
 	{
 		packetSize = sizeof(st_PACKET_CS_MOVE_STOP);
 		MakePacket_MoveStop(&header, (st_PACKET_CS_MOVE_STOP *)packet, g_my_player->GetDirection(), g_my_player->GetCurX(), g_my_player->GetCurY());
 	}
 
+	// 케릭터 행동
 	g_my_player->ActionInput(action);
 
+	// 패킷 전송
 	if (g_beforeAction != action)
 		SendPacket(&header, (char *)&packet, packetSize);
 

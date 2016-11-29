@@ -72,8 +72,9 @@ void PlayerObject::ActionProc(void)
 void PlayerObject::InputActionProc(void)
 {
 	int x, y;
-	if (!IsPlayer())
-		return;
+
+	//if (!IsPlayer())
+	//	return;
 
 	x = GetCurX();
 	y = GetCurY();
@@ -208,7 +209,7 @@ int PlayerObject::GetHp(void)
 	return _hp;
 }
 
-e_DIRECTION PlayerObject::GetDirection(void)
+WORD PlayerObject::GetDirection(void)
 {
 	return _direction;
 }
@@ -218,7 +219,7 @@ void PlayerObject::SetHp(int hp)
 	_hp = hp;
 }
 
-void PlayerObject::SetDriection(e_DIRECTION direction)
+void PlayerObject::SetDriection(WORD direction)
 {
 	_direction = direction;
 }

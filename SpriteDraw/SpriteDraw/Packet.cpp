@@ -26,7 +26,7 @@ void SendPacket(st_PACKET_HEADER * header, char * packet, int packetSize)
 	SendEvent();
 }
 
-void MakePacket_MoveStart(st_PACKET_HEADER *header, st_PACKET_CS_MOVE_START *packet, BYTE direction, DWORD x, DWORD y)
+void MakePacket_MoveStart(st_PACKET_HEADER *header, st_PACKET_CS_MOVE_START *packet, BYTE direction, WORD x, WORD y)
 {
 	header->code = PACKET_CODE;
 	header->type = PACKET_CS_MOVE_START;
@@ -37,11 +37,44 @@ void MakePacket_MoveStart(st_PACKET_HEADER *header, st_PACKET_CS_MOVE_START *pac
 	packet->y = y;
 }
 
-void MakePacket_MoveStop(st_PACKET_HEADER *header, st_PACKET_CS_MOVE_STOP *packet, BYTE direction, DWORD x, DWORD y)
+void MakePacket_MoveStop(st_PACKET_HEADER *header, st_PACKET_CS_MOVE_STOP *packet, BYTE direction, WORD x, WORD y)
 {
 	header->code = PACKET_CODE;
 	header->type = PACKET_CS_MOVE_STOP;
 	header->size = sizeof(st_PACKET_CS_MOVE_STOP);
+
+	packet->direction = direction;
+	packet->x = x;
+	packet->y = y;
+}
+
+void MakePacket_Attack1(st_PACKET_HEADER * header, st_PACKET_CS_ATTACK * packet, BYTE direction, WORD x, WORD y)
+{
+	header->code = PACKET_CODE;
+	header->type = PACKET_CS_ATTACK1;
+	header->size = sizeof(st_PACKET_CS_ATTACK);
+
+	packet->direction = direction;
+	packet->x = x;
+	packet->y = y;
+}
+
+void MakePacket_Attack2(st_PACKET_HEADER * header, st_PACKET_CS_ATTACK * packet, BYTE direction, WORD x, WORD y)
+{
+	header->code = PACKET_CODE;
+	header->type = PACKET_CS_ATTACK2;
+	header->size = sizeof(st_PACKET_CS_ATTACK);
+
+	packet->direction = direction;
+	packet->x = x;
+	packet->y = y;
+}
+
+void MakePacket_Attack3(st_PACKET_HEADER * header, st_PACKET_CS_ATTACK * packet, BYTE direction, WORD x, WORD y)
+{
+	header->code = PACKET_CODE;
+	header->type = PACKET_CS_ATTACK3;
+	header->size = sizeof(st_PACKET_CS_ATTACK);
 
 	packet->direction = direction;
 	packet->x = x;

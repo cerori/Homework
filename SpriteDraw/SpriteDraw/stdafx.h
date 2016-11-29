@@ -27,6 +27,8 @@ using namespace std;
 // TODO: 프로그램에 필요한 추가 헤더는 여기에서 참조합니다.
 
 #define LOG_FILENAME "online_fighter.log"
+#define RECV_LOG_FILENAME "queue_recv.log"
+#define SEND_LOG_FILENAME "queue_send.log"
 
 #define dfACTION_MOVE_LL	0
 #define dfACTION_MOVE_LU	1
@@ -131,6 +133,12 @@ enum SPRITE_LIST
 	PLAYER_ATTACK3_R05,
 	PLAYER_ATTACK3_R06,
 	PLAYER_ATTACK3_R_MAX = PLAYER_ATTACK3_R06,
+
+	EFFECT_SPARK_01,
+	EFFECT_SPARK_02,
+	EFFECT_SPARK_03,
+	EFFECT_SPARK_04,
+	EFFECT_SPARK_MAX = EFFECT_SPARK_04,
 
 	eGUAGE_HP,
 	eSHADOW

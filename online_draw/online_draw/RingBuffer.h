@@ -33,7 +33,7 @@ private:
 	char *_data;
 	int _readPos, _writePos;
 	int _useSize, _freeSize;
-	const int _max_size = 100;
+	const int _max_size = 1500;
 };
 
 #endif
