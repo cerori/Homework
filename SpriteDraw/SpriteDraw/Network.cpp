@@ -192,17 +192,18 @@ void PacketProc_CreateMyCharacter(char * packet)
 	g_my_player = new PlayerObject();
 
 	g_my_player->SetId(st_player->id);
-	g_my_player->SetHp(st_player->hp);
+	g_my_player->SetDriection(st_player->direction);
 	g_my_player->SetPostion(st_player->x, st_player->y);
+	g_my_player->SetHp(st_player->hp);
 	g_my_player->SetObjectType(PLAYER);
 
-	if (st_player->direction == 0)
+	if (st_player->direction == PACKET_MOVE_DIR_LL)
 	{
-		g_my_player->SetSprite(PLAYER_STAND_R01, PLAYER_STAND_R_MAX, dfDELAY_STAND);
+		g_my_player->SetSprite(PLAYER_STAND_L01, PLAYER_STAND_L_MAX, dfDELAY_STAND);
 	}
 	else
 	{
-		g_my_player->SetSprite(PLAYER_STAND_L01, PLAYER_STAND_L_MAX, dfDELAY_STAND);
+		g_my_player->SetSprite(PLAYER_STAND_R01, PLAYER_STAND_R_MAX, dfDELAY_STAND);
 	}
 
 	g_list.push_back(g_my_player);
@@ -216,16 +217,17 @@ void PacketProc_CreateOtherCharacter(char * packet)
 
 	player->SetId(st_player->id);
 	player->SetHp(st_player->hp);
+	player->SetDriection(st_player->direction);
 	player->SetPostion(st_player->x, st_player->y);
 	player->SetObjectType(ENEMY);
 
-	if (st_player->direction == 0)
+	if (st_player->direction == PACKET_MOVE_DIR_LL)
 	{
-		player->SetSprite(PLAYER_STAND_R01, PLAYER_STAND_R_MAX, dfDELAY_STAND);
+		player->SetSprite(PLAYER_STAND_L01, PLAYER_STAND_L_MAX, dfDELAY_STAND);
 	}
 	else
 	{
-		player->SetSprite(PLAYER_STAND_L01, PLAYER_STAND_L_MAX, dfDELAY_STAND);
+		player->SetSprite(PLAYER_STAND_R01, PLAYER_STAND_R_MAX, dfDELAY_STAND);
 	}
 
 	g_list.push_back(player);
@@ -235,16 +237,17 @@ void packetProc_DeleteCharacter(char * packet)
 {
 	st_PACKET_SC_DELETE *player = (st_PACKET_SC_DELETE *)packet;
 
+	FileLog(LOG_FILENAME, "delete: %d", player->id);
+
 	list<BaseObject *>::iterator iter;
-	for (iter = g_list.begin(); iter != g_list.end(); iter++)
+	for (iter = g_list.begin(); iter != g_list.end();)
 	{
 		if ((*iter)->GetId() == player->id)
 		{
-			g_list.remove(*iter);
+			g_list.erase(iter++);
 			break;
 		}
 	}
-
 }
 
 void packetProc_MoveStart(char * packet)
@@ -253,25 +256,50 @@ void packetProc_MoveStart(char * packet)
 
 	FileLog(LOG_FILENAME, "move start: %d, %d, %d", player->direction, player->x, player->y);
 
-	RecvQ.ClearBuffer();
+	//RecvQ.ClearBuffer();
 }
 
 void packetProc_MoveStop(char * packet)
 {
+	st_PACKET_SC_MOVE_STOP *player = (st_PACKET_SC_MOVE_STOP *)packet;
+
+	FileLog(LOG_FILENAME, "move stop: %d, %d, %d, %d", player->id, player->direction, player->x, player->y);
+
+	//RecvQ.ClearBuffer();
 }
 
 void packetProc_Attack1(char * packet)
 {
+	st_PACKET_SC_ATTACK *player = (st_PACKET_SC_ATTACK *)packet;
+
+	FileLog(LOG_FILENAME, "attack1: %d, %d, %d, %d", player->id, player->direction, player->x, player->y);
+
+	//RecvQ.ClearBuffer();
 }
 
 void packetProc_Attack2(char * packet)
 {
+	st_PACKET_SC_ATTACK *player = (st_PACKET_SC_ATTACK *)packet;
+
+	FileLog(LOG_FILENAME, "attack2: %d, %d, %d, %d", player->id, player->direction, player->x, player->y);
+
+	//RecvQ.ClearBuffer();
 }
 
 void packetProc_Attack3(char * packet)
 {
+	st_PACKET_SC_ATTACK *player = (st_PACKET_SC_ATTACK *)packet;
+
+	FileLog(LOG_FILENAME, "attack3: %d, %d, %d, %d", player->id, player->direction, player->x, player->y);
+
+	//RecvQ.ClearBuffer();
 }
 
 void packetProc_Damage(char * packet)
 {
+	st_PACKET_SC_DAMAGE *player = (st_PACKET_SC_DAMAGE *)packet;
+
+	FileLog(LOG_FILENAME, "damage: %d, %d, %d", player->fromId, player->toId, player->hp);
+
+	//RecvQ.ClearBuffer();
 }

@@ -441,54 +441,95 @@ void KeyProcess(void)
 	//대각선
 	if (g_keyMgr->StayKeyDown(VK_LEFT) && g_keyMgr->StayKeyDown(VK_UP))
 	{
+		if (g_beforeAction != dfACTION_MOVE_RR)
+		{
+			packetSize = sizeof(st_PACKET_CS_MOVE_START);
+			MakePacket_MoveStart(&header, (st_PACKET_CS_MOVE_START *)packet, dfACTION_MOVE_RR, g_my_player->GetCurX(), g_my_player->GetCurY());
+		}
 
 		action = dfACTION_MOVE_LU;
 	}
 
 	if (g_keyMgr->StayKeyDown(VK_LEFT) && g_keyMgr->StayKeyDown(VK_DOWN))
 	{
+		if (g_beforeAction != dfACTION_MOVE_RR)
+		{
+			packetSize = sizeof(st_PACKET_CS_MOVE_START);
+			MakePacket_MoveStart(&header, (st_PACKET_CS_MOVE_START *)packet, dfACTION_MOVE_RR, g_my_player->GetCurX(), g_my_player->GetCurY());
+		}
 
 		action = dfACTION_MOVE_LD;
 	}
 
 	if (g_keyMgr->StayKeyDown(VK_RIGHT) && g_keyMgr->StayKeyDown(VK_UP))
 	{
+		if (g_beforeAction != dfACTION_MOVE_RR)
+		{
+			packetSize = sizeof(st_PACKET_CS_MOVE_START);
+			MakePacket_MoveStart(&header, (st_PACKET_CS_MOVE_START *)packet, dfACTION_MOVE_RR, g_my_player->GetCurX(), g_my_player->GetCurY());
+		}
 
 		action = dfACTION_MOVE_RU;
 	}
 
 	if (g_keyMgr->StayKeyDown(VK_RIGHT) && g_keyMgr->StayKeyDown(VK_DOWN))
 	{
+		if (g_beforeAction != dfACTION_MOVE_RR)
+		{
+			packetSize = sizeof(st_PACKET_CS_MOVE_START);
+			MakePacket_MoveStart(&header, (st_PACKET_CS_MOVE_START *)packet, dfACTION_MOVE_RR, g_my_player->GetCurX(), g_my_player->GetCurY());
+		}
 
 		action = dfACTION_MOVE_RD;
 	}
 
-	// 공격
+	// 공격1
 	if (g_keyMgr->OnceKeyDown(e_Z))
 	{
+		if (g_beforeAction != dfACTION_ATTACK1)
+		{
+			packetSize = sizeof(st_PACKET_CS_MOVE_START);
+			MakePacket_Attack1(&header, (st_PACKET_CS_ATTACK *)packet, g_my_player->GetDirection(), g_my_player->GetCurX(), g_my_player->GetCurY());
+		}
 
 		action = dfACTION_ATTACK1;
 	}
 
+	// 공격2
 	if (g_keyMgr->OnceKeyDown(e_X))
 	{
+		if (g_beforeAction != dfACTION_ATTACK2)
+		{
+			packetSize = sizeof(st_PACKET_CS_MOVE_START);
+			MakePacket_Attack2(&header, (st_PACKET_CS_ATTACK *)packet, g_my_player->GetDirection(), g_my_player->GetCurX(), g_my_player->GetCurY());
+		}
 
 		action = dfACTION_ATTACK2;
 	}
 
+	// 공격3
 	if (g_keyMgr->OnceKeyDown(e_C))
 	{
+		if (g_beforeAction != dfACTION_ATTACK3)
+		{
+			packetSize = sizeof(st_PACKET_CS_MOVE_START);
+			MakePacket_Attack3(&header, (st_PACKET_CS_ATTACK *)packet, g_my_player->GetDirection(), g_my_player->GetCurX(), g_my_player->GetCurY());
+		}
+
 		action = dfACTION_ATTACK3;
 	}
 
+	// 기본 동작
 	if (action == dfACTION_STAND)
 	{
 		packetSize = sizeof(st_PACKET_CS_MOVE_STOP);
 		MakePacket_MoveStop(&header, (st_PACKET_CS_MOVE_STOP *)packet, g_my_player->GetDirection(), g_my_player->GetCurX(), g_my_player->GetCurY());
 	}
 
+	// 케릭터 행동
 	g_my_player->ActionInput(action);
 
+	// 패킷 전송
 	if (g_beforeAction != action)
 		SendPacket(&header, (char *)&packet, packetSize);
 
