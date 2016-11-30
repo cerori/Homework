@@ -54,6 +54,9 @@ using namespace std;
 #define dfDELAY_ATTACK3	4
 #define dfDELAY_EFFECT	3
 
+#define dfSPEED_PLAYER_X	3
+#define dfSPEED_PLAYER_Y	2
+
 #define dfRANGE_MOVE_TOP	50
 #define dfRANGE_MOVE_LEFT	10
 #define dfRANGE_MOVE_RIGHT	630

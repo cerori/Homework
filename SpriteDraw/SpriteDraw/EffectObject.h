@@ -12,6 +12,7 @@ public:
 	EffectObject();
 	virtual void Action(void);
 	virtual void Draw(BYTE *pDest, int destWidth, int destHeight, int destPitch);
+	void SetEffect(void);
 
 private:
 	DWORD _attackId;
