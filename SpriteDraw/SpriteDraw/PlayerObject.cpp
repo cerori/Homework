@@ -16,6 +16,8 @@ void PlayerObject::Action(void)
 {
 	NextFrame();
 	ActionProc();
+
+	_actionPrev = _actionInput;
 }
 
 void PlayerObject::Draw(BYTE *pDest, int destWidth, int destHeight, int destPitch)
@@ -65,10 +67,17 @@ void PlayerObject::ActionProc(void)
 		if (_actionCur != _actionInput && !IsEndFrame())
 			SetActionAttack3();
 		break;
+	default:
+		InputActionProc();
+
 	}
 
-	if (_actionPrev != dfACTION_STAND && IsEndFrame())
-		InputActionProc();
+	//if (_actionPrev = _actionInput && !IsEndFrame())
+	//{
+	//	_actionInput = _actionPrev;
+	//	return;
+	//}
+
 }
 
 void PlayerObject::InputActionProc(void)
@@ -228,8 +237,6 @@ void PlayerObject::SetDriection(BYTE direction)
 
 void PlayerObject::SetActionAttack1()
 {
-	_actionPrev = _actionCur;
-
 	if (_direction == e_LEFT)
 		SetSprite(PLAYER_ATTACK1_L01, PLAYER_ATTACK1_L_MAX, dfDELAY_ATTACK1);
 	else
@@ -238,8 +245,6 @@ void PlayerObject::SetActionAttack1()
 
 void PlayerObject::SetActionAttack2()
 {
-	_actionPrev = _actionCur;
-
 	if (_direction == e_LEFT)
 		SetSprite(PLAYER_ATTACK2_L01, PLAYER_ATTACK2_L_MAX, dfDELAY_ATTACK2);
 	else
@@ -248,8 +253,6 @@ void PlayerObject::SetActionAttack2()
 
 void PlayerObject::SetActionAttack3()
 {
-	_actionPrev = _actionCur;
-
 	if (_direction == e_LEFT)
 		SetSprite(PLAYER_ATTACK3_L01, PLAYER_ATTACK3_L_MAX, dfDELAY_ATTACK3);
 	else
@@ -258,8 +261,6 @@ void PlayerObject::SetActionAttack3()
 
 void PlayerObject::SetActionStand()
 {
-	_actionPrev = _actionCur;
-
 	if (_direction == e_LEFT)
 		SetSprite(PLAYER_STAND_L01, PLAYER_STAND_L_MAX, dfDELAY_STAND);
 	else
@@ -268,8 +269,6 @@ void PlayerObject::SetActionStand()
 
 void PlayerObject::SetActionMove()
 {
-	_actionPrev = _actionCur;
-
 	if (_direction == e_LEFT)
 		SetSprite(PLAYER_MOVE_L01, PLAYER_MOVE_L_MAX, dfDELAY_MOVE);
 	else
