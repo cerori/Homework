@@ -16,6 +16,8 @@ void PlayerObject::Action(void)
 {
 	NextFrame();
 	ActionProc();
+
+	_actionPrev = _actionInput;
 }
 
 void PlayerObject::Draw(BYTE *pDest, int destWidth, int destHeight, int destPitch)
@@ -38,10 +40,11 @@ void PlayerObject::ActionProc(void)
 			ActionInput(dfACTION_STAND);
 			SetActionStand();
 		}
+
 		if (_actionCur != _actionInput && !IsEndFrame())
 			SetActionAttack1();
-
 		break;
+
 	case dfACTION_ATTACK2:
 		if (IsEndFrame())
 		{
@@ -53,6 +56,7 @@ void PlayerObject::ActionProc(void)
 		if (_actionCur != _actionInput && !IsEndFrame())
 			SetActionAttack2();
 		break;
+
 	case dfACTION_ATTACK3:
 		if (IsEndFrame())
 		{
@@ -65,8 +69,15 @@ void PlayerObject::ActionProc(void)
 		break;
 	default:
 		InputActionProc();
-		break;
+
 	}
+
+	//if (_actionPrev = _actionInput && !IsEndFrame())
+	//{
+	//	_actionInput = _actionPrev;
+	//	return;
+	//}
+
 }
 
 void PlayerObject::InputActionProc(void)
@@ -83,7 +94,7 @@ void PlayerObject::InputActionProc(void)
 	{
 	case dfACTION_MOVE_UU:
 		if (y >= dfRANGE_MOVE_TOP)
-			y -= 1;			
+			y -= dfSPEED_PLAYER_Y;
 		
 		SetPostion(x, y);
 		if (IsEndFrame())
@@ -93,7 +104,7 @@ void PlayerObject::InputActionProc(void)
 		break;
 	case dfACTION_MOVE_DD:
 		if (y <= dfRANGE_MOVE_BOTTOM)
-			y += 1;
+			y += dfSPEED_PLAYER_Y;
 
 		SetPostion(x, y);
 		if (IsEndFrame())
@@ -103,7 +114,7 @@ void PlayerObject::InputActionProc(void)
 		break;
 	case dfACTION_MOVE_LL:
 		if (GetCurX() >= dfRANGE_MOVE_LEFT)
-			x -= 1;
+			x -= dfSPEED_PLAYER_X;
 
 		_direction = e_LEFT;
 		SetPostion(x, y);
@@ -114,7 +125,7 @@ void PlayerObject::InputActionProc(void)
 		break;
 	case dfACTION_MOVE_RR:
 		if (GetCurX() <= dfRANGE_MOVE_RIGHT)
-			x += 1;
+			x += dfSPEED_PLAYER_X;
 
 		_direction = e_RIGHT;
 
@@ -128,10 +139,10 @@ void PlayerObject::InputActionProc(void)
 	// ´ë°¢¼±
 	case dfACTION_MOVE_LU:
 		if (GetCurX() >= dfRANGE_MOVE_LEFT)
-			x -= 1;
+			x -= dfSPEED_PLAYER_X;
 
 		if (GetCurY() >= dfRANGE_MOVE_TOP)
-			y -= 1;
+			y -= dfSPEED_PLAYER_Y;
 
 		_direction = e_LEFT;
 		SetPostion(x, y);
@@ -143,14 +154,14 @@ void PlayerObject::InputActionProc(void)
 
 	case dfACTION_MOVE_LD:
 		if (GetCurX() >= dfRANGE_MOVE_LEFT)
-			x -= 1;
+			x -= dfSPEED_PLAYER_X;
 
 		if (GetCurY() <= dfRANGE_MOVE_BOTTOM)
-			y += 1;
+			y += dfSPEED_PLAYER_Y;
 
 		_direction = e_LEFT;
 
-		SetPostion(GetCurX() - 1, GetCurY() + 1);
+		SetPostion(x, y);
 		if (IsEndFrame())
 		{
 			SetActionMove();
@@ -159,10 +170,10 @@ void PlayerObject::InputActionProc(void)
 
 	case dfACTION_MOVE_RU:
 		if (GetCurX() <= dfRANGE_MOVE_RIGHT)
-			x += 1;
+			x += dfSPEED_PLAYER_X;
 
 		if (GetCurY() >= dfRANGE_MOVE_TOP)
-			y -= 1;
+			y -= dfSPEED_PLAYER_Y;
 
 		_direction = e_RIGHT;
 
@@ -175,13 +186,13 @@ void PlayerObject::InputActionProc(void)
 
 	case dfACTION_MOVE_RD:
 		if (GetCurX() <= dfRANGE_MOVE_RIGHT)
-			x += 1;
+			x += dfSPEED_PLAYER_X;
 
 		if (GetCurY() <= dfRANGE_MOVE_BOTTOM)
-			y += 1;
+			y += dfSPEED_PLAYER_Y;
 
 		_direction = e_RIGHT;
-		SetPostion(GetCurX() + 1, GetCurY() + 1);
+		SetPostion(x, y);
 		if (IsEndFrame())
 		{
 			SetActionMove();
@@ -209,7 +220,7 @@ int PlayerObject::GetHp(void)
 	return _hp;
 }
 
-WORD PlayerObject::GetDirection(void)
+BYTE PlayerObject::GetDirection(void)
 {
 	return _direction;
 }
@@ -219,15 +230,13 @@ void PlayerObject::SetHp(int hp)
 	_hp = hp;
 }
 
-void PlayerObject::SetDriection(WORD direction)
+void PlayerObject::SetDriection(BYTE direction)
 {
 	_direction = direction;
 }
 
 void PlayerObject::SetActionAttack1()
 {
-	_actionCur = dfACTION_ATTACK1;
-
 	if (_direction == e_LEFT)
 		SetSprite(PLAYER_ATTACK1_L01, PLAYER_ATTACK1_L_MAX, dfDELAY_ATTACK1);
 	else
@@ -236,8 +245,6 @@ void PlayerObject::SetActionAttack1()
 
 void PlayerObject::SetActionAttack2()
 {
-	_actionCur = dfACTION_ATTACK2;
-
 	if (_direction == e_LEFT)
 		SetSprite(PLAYER_ATTACK2_L01, PLAYER_ATTACK2_L_MAX, dfDELAY_ATTACK2);
 	else
@@ -246,8 +253,6 @@ void PlayerObject::SetActionAttack2()
 
 void PlayerObject::SetActionAttack3()
 {
-	_actionCur = dfACTION_ATTACK3;
-
 	if (_direction == e_LEFT)
 		SetSprite(PLAYER_ATTACK3_L01, PLAYER_ATTACK3_L_MAX, dfDELAY_ATTACK3);
 	else
@@ -256,8 +261,6 @@ void PlayerObject::SetActionAttack3()
 
 void PlayerObject::SetActionStand()
 {
-	_actionCur = dfACTION_STAND;
-
 	if (_direction == e_LEFT)
 		SetSprite(PLAYER_STAND_L01, PLAYER_STAND_L_MAX, dfDELAY_STAND);
 	else
@@ -266,8 +269,6 @@ void PlayerObject::SetActionStand()
 
 void PlayerObject::SetActionMove()
 {
-	_actionCur = dfACTION_MOVE;
-
 	if (_direction == e_LEFT)
 		SetSprite(PLAYER_MOVE_L01, PLAYER_MOVE_L_MAX, dfDELAY_MOVE);
 	else

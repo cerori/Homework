@@ -5,7 +5,9 @@
 #include "RingBuffer.h"
 #include "PlayerObject.h"
 #include "EffectObject.h"
+#include "MainFunc.h"
 
+extern HWND g_hWnd; 
 extern SOCKET g_sock;
 extern BOOL g_isCanSendPacket;
 extern BOOL g_successConnect;
@@ -15,9 +17,39 @@ extern PlayerObject *g_my_player;
 extern EffectObject *g_effect;
 extern list<BaseObject *> g_list;
 extern DWORD g_lineNum;
+extern WCHAR g_ip[];
 
 static int _recvLineNum = 0;
 static int _sendLineNum = 0;
+
+void InitWSA(void)
+{
+	int retval;
+
+	g_isCanSendPacket = FALSE;
+	g_successConnect = FALSE;
+
+	// 윈속 초기화
+	WSADATA wsa;
+	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
+		return;
+
+	// socket()
+	g_sock = socket(AF_INET, SOCK_STREAM, 0);
+	if (g_sock == INVALID_SOCKET) err_quit(L"socket()");
+
+	retval = WSAAsyncSelect(g_sock, g_hWnd, WM_USER_SOCKET, FD_READ | FD_WRITE | FD_CONNECT | FD_CLOSE);
+	if (retval == SOCKET_ERROR) err_quit(L"WSAAsyncSelect()");
+
+	// bind()
+	SOCKADDR_IN serveraddr;
+	ZeroMemory(&serveraddr, sizeof(serveraddr));
+	serveraddr.sin_family = AF_INET;
+	InetPton(AF_INET, g_ip, &serveraddr.sin_addr.s_addr);
+	serveraddr.sin_port = htons(NETWORK_PORT);
+
+	retval = connect(g_sock, (SOCKADDR *)&serveraddr, sizeof(serveraddr));
+}
 
 BOOL NetworkProc(WPARAM wParam, LPARAM lParam)
 {
@@ -105,7 +137,7 @@ BOOL RecvEvent(void)
 
 		// 페이로드 + endcode 만큼 데이터가 있는지 확인
 		FileLog(RECV_LOG_FILENAME, "%4d\tpayload peek", _recvLineNum++);
-		if (header.size + sizeof(NETWORK_PACKET_END) <= RecvQ.GetUseSize())
+		if ((int)(header.size + sizeof(NETWORK_PACKET_END)) <= RecvQ.GetUseSize())
 		{
 			peekSize = RecvQ.Dequeue(payloadBuff, (int)header.size);
 			FileLog(RECV_LOG_FILENAME, "%4d\tcheck payload size", _recvLineNum++);
@@ -130,6 +162,8 @@ BOOL RecvEvent(void)
 			}
 
 			FileLog(RECV_LOG_FILENAME, "%4d Packet Procedure %d", _recvLineNum++, header.type);
+
+			// 패킷 전송
 			PacketProc(header.type, payloadBuff);
 		}
 		else
@@ -138,8 +172,7 @@ BOOL RecvEvent(void)
 			break;
 		}
 	}
-
-
+	
 	return TRUE;
 }
 
@@ -455,10 +488,10 @@ void packetProc_Damage(char * packet)
 			player->SetHp(fromServer->hp);
 
 			x = player->GetCurX();
-			y = player->GetCurX();
+			y = player->GetCurY();
 
-			g_effect->SetPostion(x, y + 1);
-			g_effect->isEffectStart = TRUE;
+			g_effect->SetEffect();
+			g_effect->SetPostion(x, y - 50);
 
 			break;
 		}
