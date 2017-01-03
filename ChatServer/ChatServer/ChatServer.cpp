@@ -180,6 +180,7 @@ void PacketProc(CLIENT *client)
 			break;
 
 		case df_REQ_ROOM_ENTER:
+			AcceptRoomEnter(client, &header, &packet);
 			break;
 
 		default:

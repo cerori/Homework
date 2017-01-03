@@ -72,6 +72,8 @@ void AcceptRoomCreate(CLIENT * client, st_PACKET_HEADER * header, CAyaPacket * p
 
 	g_roomSeq++;
 
+	// 방 이름 중복 체크
+
 	// 만들어진 방 갯수
 	packet->GetData((char *)&size, sizeof(size));
 
@@ -84,12 +86,15 @@ void AcceptRoomCreate(CLIENT * client, st_PACKET_HEADER * header, CAyaPacket * p
 
 	// 접속된 클라이언트 들에게 지금 생성된 방 정보면 전송
 	list<CLIENT *>::iterator iter = g_client_list.begin();
-	for (; iter != g_client_list.end(); )
+	for (; iter != g_client_list.end(); iter++)
 	{
-		MakePacket_Res_Room(*iter, header, room);
+		if ((*iter)->userNo == client->userNo)
+			continue;
 
-		iter++;
+		MakePacket_Res_Room(*iter, header, room);		
 	}
+
+	MakePacket_Res_CreateRoom(client, header, room, df_RESULT_ROOM_CREATE_OK);
 }
 
 void AcceptRoomEnter(CLIENT * client, st_PACKET_HEADER * header, CAyaPacket * packet)
@@ -97,14 +102,19 @@ void AcceptRoomEnter(CLIENT * client, st_PACKET_HEADER * header, CAyaPacket * pa
 	DWORD roomNo;
 	ROOM *room;
 
-	*packet >> roomNo;
+	packet->GetData((char*)&roomNo, sizeof(DWORD));
 
 	map<DWORD, ROOM *>::iterator iter = g_room_list.find(roomNo);
 
-	room = iter->second;
-	room->users.push_back(client);
+	if (iter != g_room_list.end())
+	{
+		room = iter->second;
+		room->users.push_back(client);
 
-	MakePacket_Res_EnterRoom(client, header);
-	
-
+		MakePacket_Res_EnterRoom(client, header, room, df_RESULT_ROOM_CREATE_OK);
+	}
+	else
+	{
+		MakePacket_Res_EnterRoom(client, header, NULL, df_RESULT_ROOM_ENTER_NOT);
+	}
 }
